@@ -40,6 +40,13 @@ namespace mastermind
             // timer.Start();
 
         }
+
+        /// <summary>
+        /// Stopt de aftellingstimer en behandelt het scenario waarin de tijd op is.
+        /// Deze methode wordt aangeroepen wanneer de speler niet binnen de tijd een poging doet.
+        /// De beurt van de speler wordt verloren verklaard, en de volgende poging begint.
+        /// </summary>
+
         private void StopCountDown()
         {
             timer.Stop(); 
@@ -59,7 +66,13 @@ namespace mastermind
                 ToggleDebug();
             }
         }
-
+        /// <summary>
+        /// Start een aftellingstimer voor de huidige poging van de speler.
+        /// De timer begint bij een vastgestelde tijd (bijv. 10 seconden) 
+        /// en telt per seconde af totdat de tijd op is.
+        /// Indien de tijd op is, wordt de methode <see cref="StopCountDown"/> aangeroepen.
+        /// </summary>
+       
         private void StartCountDown()
         {
             timeLeft = 10;
@@ -94,7 +107,20 @@ namespace mastermind
         }
 
 
+
+
+
+
         private bool isDebugMode = false;
+
+
+
+        /// <summary>
+        /// Schakelt de debugmodus in of uit.
+        /// In debugmodus wordt een TextBox weergegeven waarin de gegenereerde code wordt getoond.
+        /// De debugmodus kan worden geactiveerd of gedeactiveerd met de sneltoets CTRL + F12.
+        /// </summary>
+
         private void ToggleDebug()
         {
             isDebugMode = !isDebugMode;
