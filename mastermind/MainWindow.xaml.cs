@@ -40,6 +40,17 @@ namespace mastermind
             // timer.Start();
 
         }
+        private void StopCountDown()
+        {
+            timer.Stop(); 
+            MessageBox.Show("De tijd is op!", "Tijd op", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+            
+            currentAttempt++;
+            NewTitle();
+
+            StartCountDown();
+        }
 
         private void MainWindow_keyDown(object sender, KeyEventArgs e)
         {
@@ -51,14 +62,14 @@ namespace mastermind
 
         private void StartCountDown()
         {
-            timeLeft = 60;
+            timeLeft = 10;
             UpdateTitleWithTime();
 
             // Voorkom dubbele eventhandlers
             timer.Tick -= Timer_Tick;
             timer.Tick += Timer_Tick;
 
-            timer.Interval = TimeSpan.FromSeconds(1); // Timer tikt elke seconde
+            timer.Interval = TimeSpan.FromSeconds(1); 
             timer.Start();
 
 
@@ -73,10 +84,7 @@ namespace mastermind
 
             if (timeLeft <= 0)
             {
-                timer.Stop();
-                MessageBox.Show("De tijd is op! Probeer opnieuw.", "Tijd op", MessageBoxButton.OK, MessageBoxImage.Warning);
-
-                // Eventueel spel stoppen of iets anders doen
+                StopCountDown();
             }
         }
 
@@ -187,6 +195,7 @@ namespace mastermind
                 MessageBox.Show("Je kunt geen poging doen, de tijd is op!", "Waarschuwing", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
+            timer.Stop();
             string guess1 = (color1.SelectedItem as ComboBoxItem)?.Content.ToString() ?? string.Empty;
             string guess2 = (color2.SelectedItem as ComboBoxItem)?.Content.ToString() ?? string.Empty;
             string guess3 = (color3.SelectedItem as ComboBoxItem)?.Content.ToString() ?? string.Empty;
