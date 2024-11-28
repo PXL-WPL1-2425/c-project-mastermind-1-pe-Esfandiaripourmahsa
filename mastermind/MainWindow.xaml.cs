@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Runtime.CompilerServices;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -20,12 +21,19 @@ namespace mastermind
         private readonly string[] codeColors = { "Red", "Orange", "Yellow", "Green", "White", "Blue" };
         private string[] generatedCode = new string[4];
         private DispatcherTimer timer = new DispatcherTimer();
+        private int currentAttempt = 0;
+        
+        private int timeLeft = 60; // Aantal seconden per poging
+
 
         public MainWindow()
         {
             InitializeComponent();      
             GenerateRandomCode();
             NewTitle();
+            this.KeyDown += MainWindow_keyDown;
+
+
 
             //  timer.Tick += StartCountDown; 
             // timer.Interval = new TimeSpan(0, 0, 1); 
@@ -33,13 +41,64 @@ namespace mastermind
 
         }
 
-        private void StartCountDown(object sender, EventArgs e)
+        private void MainWindow_keyDown(object sender, KeyEventArgs e)
         {
+            if (e.Key == Key.F12 && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                ToggleDebug();
+            }
+        }
+
+        private void StartCountDown()
+        {
+            timeLeft = 60;
+            UpdateTitleWithTime();
+
+            // Voorkom dubbele eventhandlers
+            timer.Tick -= Timer_Tick;
+            timer.Tick += Timer_Tick;
+
+            timer.Interval = TimeSpan.FromSeconds(1); // Timer tikt elke seconde
+            timer.Start();
+
+
             //timeLabel.Content = $"{DateTime.Now.ToLongTimeString()}";
+        }
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            timeLeft--;
+
+            // Update de titel terwijl de tijd aftelt
+            UpdateTitleWithTime();
+
+            if (timeLeft <= 0)
+            {
+                timer.Stop();
+                MessageBox.Show("De tijd is op! Probeer opnieuw.", "Tijd op", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                // Eventueel spel stoppen of iets anders doen
+            }
+        }
+
+        private void UpdateTitleWithTime()
+        {
+            Title = $"MasterMind - Poging {currentAttempt} - Tijd over: {timeLeft} seconden";
         }
 
 
-        private int currentAttempt = 0;
+        private bool isDebugMode = false;
+        private void ToggleDebug()
+        {
+            isDebugMode = !isDebugMode;
+            debugCodeTextBox.Visibility = isDebugMode ? Visibility.Visible : Visibility.Collapsed;
+
+            if (isDebugMode)
+            {
+                debugCodeTextBox.Text = string.Join(" , ", generatedCode);
+            }
+        }
+
+        
 
 
         private void GenerateRandomCode()
@@ -51,6 +110,8 @@ namespace mastermind
             {
                 generatedCode[i] = codeColors[random.Next(codeColors.Length)];
             }
+
+            StartCountDown();
             
 
         }
@@ -121,6 +182,11 @@ namespace mastermind
 
         private void CheckButton_Click(object sender, RoutedEventArgs e)
         {
+            if (currentAttempt > 0 && timeLeft <= 0)
+            {
+                MessageBox.Show("Je kunt geen poging doen, de tijd is op!", "Waarschuwing", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             string guess1 = (color1.SelectedItem as ComboBoxItem)?.Content.ToString() ?? string.Empty;
             string guess2 = (color2.SelectedItem as ComboBoxItem)?.Content.ToString() ?? string.Empty;
             string guess3 = (color3.SelectedItem as ComboBoxItem)?.Content.ToString() ?? string.Empty;
@@ -130,16 +196,12 @@ namespace mastermind
             currentAttempt++;
             NewTitle();
 
+            StartCountDown();
+
         }
         
         
-        private void ClearBorder()
-        {
-            color1Label.BorderBrush = Brushes.Transparent;
-            color2Label.BorderBrush = Brushes.Transparent;
-            color3Label.BorderBrush = Brushes.Transparent;
-            color4Label.BorderBrush = Brushes.Transparent;
-        }
+       
 
         private void CheckGuesses(string guess1, string guess2, string guess3, string guess4)
         {
@@ -184,6 +246,13 @@ namespace mastermind
             }
 
 
+        }
+        private void ClearBorder()
+        {
+            color1Label.BorderBrush = Brushes.Transparent;
+            color2Label.BorderBrush = Brushes.Transparent;
+            color3Label.BorderBrush = Brushes.Transparent;
+            color4Label.BorderBrush = Brushes.Transparent;
         }
     }
 }
